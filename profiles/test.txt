@@ -1,0 +1,51 @@
+clear active off debug on mode pid p 1000 i 0 d 0 rate 0 next 1s
+profile reset tempplus 1 value start active on next target
+profile next peak
+profile findp next 1s
+profile tempplus 1 next peak
+profile value cycle next peak
+profile value peak findp next 1s
+profile value cycle tempplus 1 next peak
+profile findi tempplus 1 reset next target
+profile findd value cycle next peak
+profile tempplus 10 next peak
+profile finetune
+start
+
+Step 1) setup for pid calibration. set status display, reset pid values
+Step 2) setpoint temp+1; save temp; turn heat on.
+Step 3) target reached. measure peak temp.
+Step 4) calculate P(max temp difference / time). 
+Step 5) reset time. setpoint = temp+1 wait for temp to peak. (target should not be reached.)
+Step 6) calculate i( (setpoint - temp) / time to peak ). temp+1. reset PID. reach target. (target should be overshot)
+Step 7) calculate d( Ki ). reset time. measure peak
+Step 8) temp+10
+
+
+
+
+calibrations
+step 1)
+cycle_count / (value 1 - value 0) = p
+d = cycle_count required to reach peak
+
+Step 2)
+set current temp + 10% to setpoint
+start i at .01;
+
+Step 3)
+ki divided by time between start of step 2 and now
+setpoint = current temp
+reset then wait for temp to stablize
+
+Fine Tune:
+
+To Speed up:
+    increase i by x% to speed up
+    increase d by x% to lower occilations
+
+clear
+profile a 1 rate 0 t 750 next 3500
+profile r 8 t 40 next target
+profile a 0
+start

@@ -1,0 +1,16 @@
+clear
+profile reset update 1 debug 1 active on rate 5 setpoint 90 next target
+profile rate 1 setpoint 100 next target
+profile next 2h
+profile rate 4 setpoint 450 next target
+profile next 2h
+profile rate 4 setpoint 780 next target
+profile next 2h
+profile active off update setpoint 60 next target
+start
+
+
+profile rate 0 setpoint 780 next target
+profile next 2h
+profile active off update setpoint 60 next target
+start
