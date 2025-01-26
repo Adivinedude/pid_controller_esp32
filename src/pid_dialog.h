@@ -1,14 +1,14 @@
 #ifndef PID_DIALOG_H
 #define PID_DIALOG_H
-#include "mygui/dialog_base.h"
-#include "mygui/dialog_button.h"
-#include "mygui/dialog_keyboard.h"
+#include "src/dialog_base.h"
+#include "src/dialog_button.h"
+#include "src/dialog_keyboard.h"
 
 #include "command_interface.h"
 
-#include "mygui/pid.h"
-//#include "mygui/config.h"
-//#include "mygui/MAX31855.h"
+#include "src/pid.h"
+//#include "src/config.h"
+//#include "src/MAX31855.h"
 
 extern PID_CONTROLLER pid;
 //extern MAX31855 tc;

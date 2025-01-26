@@ -8,20 +8,20 @@
 
 //#define CONFIG_ARDUINO_LOOP_STACK_SIZE
 
-#include "mygui/config.h"
+#include "src/config.h"
 #include <TelnetStream.h>
 
 #include <Arduino.h>
 
 #include "main_dialog.h"
 #include "command_interface.h"
-#include "mygui/sd_card_reader.h"
-//#include "mygui/thermocouple_array.h"
+#include "src/sd_card_reader.h"
+//#include "src/thermocouple_array.h"
 #include <algorithm>
 
-#include "mygui/MAX31855.h"
+#include "src/MAX31855.h"
 #include "command_task.h"
-#include "mygui/pid.h"
+#include "src/pid.h"
 
 #include "math.h"
 
@@ -100,10 +100,12 @@ void TEMP_TASK_LOOP(void *pvParameters){
   //let the chip power up
   delay(1000);
 
-  #define SAMPLE_ARRAY_SIZE 1
+  #define SAMPLE_ARRAY_SIZE 8
+  #define SAMPLE_ARRAY_MASK 0X07
 
   float sample_array[SAMPLE_ARRAY_SIZE];
   float average = 0;
+  unsigned char iterator = 0;
   bool first_run = true;
 
   for(;;){
@@ -112,15 +114,23 @@ void TEMP_TASK_LOOP(void *pvParameters){
 
     //wait for the bad readings to by cycled out.
     delay(MAX31855_READ_DELAY);
+    delay(MAX31855_READ_DELAY);
+    tc.Update();
+    if( !tc.error() ){
+      sample_array[iterator] = tc.Read(KELVIN);
+      iterator++;
+      iterator &= SAMPLE_ARRAY_MASK;
+    }
 
     //take multiple samples from the chip
-    for( int a = 0; a != SAMPLE_ARRAY_SIZE; ++a){
-      delay(MAX31855_READ_DELAY); //minimum delay between chip readings
-      tc.Update();                //read the chip
-      if( tc.error() )
-        break;
-      sample_array[a] = tc.Read(KELVIN);  //store the results
-    }
+    // for( int a = 0; a != SAMPLE_ARRAY_SIZE; ++a){
+    //   delay(MAX31855_READ_DELAY); //minimum delay between chip readings
+    //   tc.Update();                //read the chip
+    //   if( tc.error())
+    //     break;
+    //   sample_array[a] = tc.Read(KELVIN);  //store the results
+    // }
+    
     //return spi access
     xSemaphoreGive( SPI_ACCESS );
 
@@ -144,11 +154,11 @@ void TEMP_TASK_LOOP(void *pvParameters){
     //check for ic defined errors
     pid.error = tc.error(); 
     pid.error_code = tc.GetError();
-    if( pid.error )
+    if( pid.error == MAX31855_ERROR_OPEN_CIRCUIT )
       TelnetStream.println( tc.GetError() );
     //store the value as kelven
     current_temp_kelvin = average;
-    delay(2000);
+    delay(250);
   }
 }
 

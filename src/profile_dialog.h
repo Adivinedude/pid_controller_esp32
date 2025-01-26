@@ -1,9 +1,9 @@
 #ifndef PROFILE_DIALOG_H
 #define PROFILE_DIALOG_H
-#include "mygui/dialog_base.h"
-#include "mygui/dialog_button.h"
-#include "mygui/dialog_keyboard.h"
-#include "mygui/dialog_listbox.h"
+#include "src/dialog_base.h"
+#include "src/dialog_button.h"
+#include "src/dialog_keyboard.h"
+#include "src/dialog_listbox.h"
 
 class select_up_arrow: public DIALOG_BUTTON_ARROW{
   public:

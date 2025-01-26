@@ -1,9 +1,9 @@
 #ifndef MAIN_DIALOG_H
 #define MAIN_DIALOG_H
 
-#include "mygui/gui.h"
-#include "mygui/dialog_keyboard.h"
-#include "mygui/pid.h"
+#include "src/gui.h"
+#include "src/dialog_keyboard.h"
+#include "src/pid.h"
 
 #include "command_interface.h"
 

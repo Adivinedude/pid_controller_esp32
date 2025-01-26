@@ -1,4 +1,3 @@
-// https://github.com/tekdemo/MiniPID/tree/master
 #include "MiniPID.h"
 #include <stdlib.h>
 
@@ -26,7 +25,9 @@ void MiniPID::init(){
 	maxOutput=0; 
 	minOutput=0;
 	setpoint=0;
-	lastActual=0;
+	for( unsigned char a = 0; a < MINIPID_AVG_COUNT; a++ )
+		lastActual[a]=0;
+	avg_iterator = 0;
 	firstRun=true;
 	reversed=false;
 	outputRampRate=0;
@@ -197,14 +198,15 @@ float MiniPID::getOutput(float actual, float setpoint){
 	Foutput=F*setpoint;
 
 	//Calculate P term
-	Poutput=P*error;	 
-
+	Poutput=clamp(P*error, -maxOutput,maxOutput);
 	//If this->is our first time running this-> we don't actually _have_ a previous input or output. 
 	//For sensor, sanely assume it was exactly where it is now.
 	//For last output, we can assume it's the current time-independent outputs. 
 	if(firstRun){
-		errorSum = 0; 
-		lastActual = actual;
+		errorSum = 0;
+		for( avg_iterator = 0; avg_iterator < MINIPID_AVG_COUNT; avg_iterator++) 
+			lastActual[avg_iterator] = actual;
+		avg_iterator = 0;
 		lastOutput=Poutput+Foutput;
 		firstRun=false;
 	}
@@ -217,13 +219,39 @@ float MiniPID::getOutput(float actual, float setpoint){
 	if(maxIOutput!=0){
 		Ioutput=clamp(Ioutput,-maxIOutput,maxIOutput); 
 	}	
-
+/*
 	//Calculate D Term
 	//Note, this->is negative. this->actually "slows" the system if it's doing
 	//the correct thing, and small values helps prevent output spikes and overshoot 
-	d_avg = actual-lastActual;
-	lastActual = actual;					
-	Doutput= -D * d_avg;// + ;
+	d_avg = 0;
+	for( unsigned short a = 0; a < MINIPID_AVG_COUNT; a++)
+		d_avg += lastActual[a];
+	d_avg /= MINIPID_AVG_COUNT;
+	d_avg = actual - d_avg;
+	// d_avg = actual-lastActual[avg_iterator & MINIPID_AVG_MASK];
+	lastActual[avg_iterator & MINIPID_AVG_MASK] = actual;
+	if( ++avg_iterator >= MINIPID_AVG_COUNT )
+		avg_iterator = 0;					
+	Doutput= -D * d_avg;
+*/
+//Calculate D Term
+	//Note, this->is negative. this->actually "slows" the system if it's doing
+	//the correct thing, and small values helps prevent output spikes and overshoot 
+	d_avg = 0;
+	
+	// for( unsigned char a = 0; a < MINIPID_AVG_COUNT; a++)
+	// 	d_avg += lastActual[a & MINIPID_AVG_MASK];
+	for( unsigned char a = 0; a < 4; a++ )
+		d_avg += lastActual[(avg_iterator + a) & MINIPID_AVG_MASK];
+
+	d_avg /= 4;
+	d_avg = actual - d_avg;
+	lastActual[avg_iterator] = actual;
+	avg_iterator += 1;
+	avg_iterator = avg_iterator & MINIPID_AVG_MASK;		
+				
+	Doutput= -D * d_avg;
+
 
 	//And, finally, we can just add the terms up
 	output=Foutput + Poutput + Ioutput + Doutput;
@@ -231,32 +259,33 @@ float MiniPID::getOutput(float actual, float setpoint){
 	////Figure out what we're doing with the error.
 
 	// only build up Error if the system is static.
-	if( 
-		(error > 0 && d_avg > 0 )
-		|| (error < 0 && d_avg < 0 )
-	){
-			error = 0;
-	}
+	// if( 
+	// 	(error > 0 && d_avg > 0 )
+	// 	|| (error < 0 && d_avg < 0 )
+	// ){
+	// 		error = 0;
+	// }
 
 	// If the 'output' is not within limits then
-	if(minOutput!=maxOutput && !bounded(output, minOutput,maxOutput) ){
+	// if(minOutput!=maxOutput && !bounded(output, minOutput,maxOutput) ){
 
-		//If P is driving the output too high, remove I's effect
-		if( Poutput > maxOutput)
-			errorSum=error;
+	// 	//If P is driving the output too high, remove I's effect
+	// 	if( Poutput > maxOutput)
+	// 		errorSum=error;
 		
-		// reset the error sum to a sane level
-		// Setting to current error ensures a smooth transition when the P term 
-		// decreases enough for the I term to start acting upon the controller
-		// From that point the I term will build up as would be expected
-	}
-	// If the 'output' is within limits and a ramp rate is set, enforce it
-	else if(outputRampRate!=0 && !bounded(output, lastOutput-outputRampRate,lastOutput+outputRampRate) ){
-		errorSum=error; 
-	}
+	// 	// reset the error sum to a sane level
+	// 	// Setting to current error ensures a smooth transition when the P term 
+	// 	// decreases enough for the I term to start acting upon the controller
+	// 	// From that point the I term will build up as would be expected
+	// }
+	// // If the 'output' is within limits and a ramp rate is set, enforce it
+	// else if(outputRampRate!=0 && !bounded(output, lastOutput-outputRampRate,lastOutput+outputRampRate) ){
+	// 	errorSum=error; 
+	// }
 
-	// If the 'output' is within limits and a Max I is set, enforce it
-	else if(maxIOutput!=0){
+	// // If the 'output' is within limits and a Max I is set, enforce it
+	// else 
+	if(maxIOutput!=0){
 		errorSum=clamp(errorSum+error,-maxError,maxError);
 		// In addition to output limiting directly, we also want to prevent I term 
 		// buildup, so restrict the error directly

@@ -1,6 +1,6 @@
 #include "command_task.h"
-#include "mygui/gui.h"
-#include "mygui/config.h"
+#include "src/gui.h"
+#include "src/config.h"
 #include "OTA.h"
 
 extern mygui GUI;

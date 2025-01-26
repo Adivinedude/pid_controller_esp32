@@ -201,10 +201,10 @@ uint32_t PID_CONTROLLER::loop(uint32_t elapse){
       }
       std::string timestr = FormatTimeOutput(this);
 
-      snprintf(_c, 200, "%d %.02f %.02f %.01f | %.02f %.02f %.02f | %.02f %f %f %s"
+      snprintf(_c, 200, "%5d %6.02f %6.02f %5.01f | %6.02f %6.02f %6.02f | %6.02f %6.02f %6.02f %s"
         , time_current/1000, GetPV(), GetSetpoint(), power,  
         pid.Poutput, pid.Ioutput, pid.Doutput, 
-        pid.errorSum, pid.d_avg, pid.error, 
+        pid.errorSum, pid.d_avg, pid.error,
         timestr.c_str());
 
       Serial.println(_c);
@@ -214,7 +214,8 @@ uint32_t PID_CONTROLLER::loop(uint32_t elapse){
   } 
   if(!active){
     pid.errorSum = 0;
-    pid.lastActual = *temp_current;
+    for( unsigned short a = 0; a < MINIPID_AVG_COUNT; a++)
+      pid.lastActual[a] = *temp_current;
     ledcWrite(_output_channel, 0);
   }
 

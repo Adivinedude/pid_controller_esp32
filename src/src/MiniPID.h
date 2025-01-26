@@ -1,6 +1,8 @@
-// https://github.com/tekdemo/MiniPID/tree/master
 #ifndef MINIPID_H
 #define MINIPID_H
+
+#define MINIPID_AVG_COUNT 	32 // must be 2^n
+#define MINIPID_AVG_MASK	0x1F
 
 class MiniPID{
 public:
@@ -44,8 +46,9 @@ public:
 
 	float setpoint;
 
-	float lastActual;
+	float lastActual[MINIPID_AVG_COUNT];
 	float d_avg;
+	unsigned char avg_iterator;
 
 	bool firstRun;
 	bool reversed;

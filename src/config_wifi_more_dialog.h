@@ -1,13 +1,13 @@
 #ifndef CONFIG_WIFI_MORE_DIALOG_H
 #define CONFIG_WIFI_MORE_DIALOG_H
 
-#include "mygui/dialog_base.h"
-#include "mygui/dialog_button.h"
-#include "mygui/dialog_keyboard.h"
-#include "mygui/dialog_listbox.h"
+#include "src/dialog_base.h"
+#include "src/dialog_button.h"
+#include "src/dialog_keyboard.h"
+#include "src/dialog_listbox.h"
 
 #include "command_interface.h"
-#include "mygui/config.h"
+#include "src/config.h"
 #include "WiFi.h"
 
 class WIFI_MORE_DIALOG: public DIALOG{

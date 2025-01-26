@@ -1,5 +1,5 @@
 #include "pid_dialog.h"
-#include "mygui/pid.h"
+#include "src/pid.h"
 
 extern OVEN_SIMULATOR oven; //oven simulator
 extern PID_CONTROLLER pid;  //heat controler object

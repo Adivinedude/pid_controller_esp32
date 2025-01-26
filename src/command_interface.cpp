@@ -1,15 +1,15 @@
 #include <Arduino.h>
 
-#include "mygui/pid.h"
-#include "mygui/gui.h"
-#include "mygui/sd_card_reader.h"
+#include "src/pid.h"
+#include "src/gui.h"
+#include "src/sd_card_reader.h"
 
 #include "command_interface.h"
-#include "mygui/config.h"
+#include "src/config.h"
 #include <sstream>
 #include <TelnetStream.h>
 
-#include "mygui/MAX31855.h"
+#include "src/MAX31855.h"
 
 command_interface cmd;
 
@@ -129,8 +129,8 @@ std::string handle_command_float( std::stringstream & s, float &f, std::stringst
   s >> t;   
   if(s.fail()){
     char buffer[10];
-    snprintf(buffer, 10, "%.2f", f);
-    rt << morphNumericString(buffer, 2);
+    snprintf(buffer, 10, "%.4f", f);
+    rt << morphNumericString(buffer, 4);
     CMD_PROFILE_END
     return rt.str();
   }
